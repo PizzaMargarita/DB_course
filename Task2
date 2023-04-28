@@ -1,0 +1,49 @@
+--Выведите номера групп и количество студентов, обучающихся в них
+Select n_group, COUNT(*)
+From student
+GROUP BY n_group;
+
+--Выведите для каждой группы максимальный средний балл
+Select n_group, MAX(score)
+From student
+GROUP BY n_group;
+
+--Подсчитать количество студентов с каждой фамилией
+Select COUNT(DISTINCT surmane)
+From student;
+
+--Подсчитать студентов, которые родились в каждом году
+Select COUNT(DISTINCT date_birth)
+From student;
+
+--Для студентов каждого курса подсчитать средний балл
+SELECT LEFT(CAST(n_group as text),1), AVG(score)
+from student
+GROUP BY n_group
+ORDER BY n_group;
+
+--Для студентов заданного курса вывести один номер группы с максимальным средним баллом
+Select n_group, AVG(score)
+From student
+WHERE CAST (n_group as text) LIKE '%2'
+GROUP BY n_group
+ORDER BY AVG(score) DESC
+LIMIT 1;
+
+--Для каждой группы подсчитать средний балл, вывести на экран только те номера групп и их средний балл, в которых он менее или равен 3.5. Отсортировать по от меньшего среднего балла к большему.
+Select n_group, AVG(score) as avg_score
+From student
+GROUP BY n_group
+HAVING(AVG(score) <= 3.5)
+ORDER BY AVG(score);
+
+--Для каждой группы в одном запросе вывести количество студентов, максимальный балл в группе, средний балл в группе, минимальный балл в группе
+Select n_group, COUNT(*), MAX(score), AVG(score), MIN(score)
+From Student
+GROUP BY n_group;
+
+--Вывести студента/ов, который/ые имеют наибольший балл в заданной группе
+Select n_group, MAX(score)
+From student
+WHERE CAST(n_group as text) LIKE '2345'
+GROUP BY n_group;
