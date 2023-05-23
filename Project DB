@@ -1,0 +1,35 @@
+BEGIN;
+
+CREATE TABLE Users(
+	user_id SERIAL PRIMARY KEY,
+	username VARCHAR(255) NOT NULL,
+	password VARCHAR(255) NOT NULL,
+	email VARCHAR(255) NOT NULL,
+  role VARCHAR(200) CHECK (role IN ('user', 'moderator'))
+);
+CREATE TABLE Moderator(
+	moder_id SERIAL PRIMARY KEY,
+	moder_name VARCHAR(255) NOT NULL,
+	moder_password VARCHAR(255) NOT NULL
+);
+CREATE TABLE Songs(
+	song_id SERIAL PRIMARY KEY,
+	song_name VARCHAR(255) NOT NULL,
+	author VARCHAR(255),
+	duration INTEGER 
+);
+CREATE TABLE Song_lyrics(
+	lyric_id SERIAL PRIMARY KEY,
+	song_id INTEGER REFERENCES Songs(song_id),
+	lyric_text TEXT NOT NULL,
+	explain_rate INT,
+	explain TEXT
+);
+CREATE TABLE Comments(
+	comment_id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES Users(user_id),
+    song_id INTEGER REFERENCES Songs(song_id),
+    lyric_id INTEGER REFERENCES Song_lyrics(lyric_id),
+    comment_text TEXT NOT NULL
+);
+		  
