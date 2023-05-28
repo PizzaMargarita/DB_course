@@ -1,0 +1,92 @@
+BEGIN;
+
+CREATE TABLE Users(
+	user_id INTEGER PRIMARY KEY,
+	username VARCHAR(255) NOT NULL,
+	password VARCHAR(255) NOT NULL,
+	email VARCHAR(255) NOT NULL,
+	role VARCHAR(200) CHECK (role IN ('user'))
+);
+CREATE TABLE Moderators(
+	moder_id INTEGER PRIMARY KEY,
+	moder_name VARCHAR(255) NOT NULL,
+	moder_password VARCHAR(255) NOT NULL,
+  	role VARCHAR(200) CHECK (role IN ('moderator'))
+);
+CREATE TABLE Songs(
+	song_id INTEGER PRIMARY KEY,
+	song_name VARCHAR(255) NOT NULL,
+	author VARCHAR(255),
+	duration INTEGER,
+	moderated BOOLEAN DEFAULT FALSE
+);
+CREATE TABLE Song_lyrics(
+	lyric_id SERIAL PRIMARY KEY,
+	song_id INTEGER REFERENCES Songs(song_id),
+	lyric_text TEXT NOT NULL,
+	explain_rate INT,
+	explain TEXT,
+	moderated BOOLEAN DEFAULT FALSE
+);
+CREATE TABLE Comments(
+	comment_id INTEGER PRIMARY KEY,
+    user_id INTEGER REFERENCES Users(user_id),
+    song_id INTEGER REFERENCES Songs(song_id),
+    lyric_id INTEGER REFERENCES Song_lyrics(lyric_id),
+    comment_text TEXT NOT NULL,
+	lyric_rate TEXT
+);
+COMMIT;
+
+
+1--Регистрация --
+INSERT INTO Users (user_id,username, password, email, role)
+VALUES (1,'John', 'password123', 'john@example.com', 'user');
+
+2--Авторизация 
+SELECT user_id, role
+FROM Users
+WHERE username = 'Viktor' AND password = 'qwerty';
+
+3--Поиск по тексту или автору
+SELECT *
+FROM Songs
+WHERE song_name LIKE '%Танцуй%' OR author LIKE '%Pyrokinesis%';
+
+4--Просмотр информации и слов песни
+SELECT Songs.song_name, Songs.author, Songs.duration, Song_lyrics.lyric_text
+FROM Songs
+JOIN Song_lyrics ON Songs.song_id = Song_lyrics.song_id
+WHERE Songs.song_name = 'What would you do';
+
+5-- Возможность добавлять новую песню и строки текста (требуется проверка модератором). К каждой строке (или сразу к нескольким) может быть оставлено объяснение слов
+INSERT INTO Songs (song_name, author, duration)
+VALUES ('New Song', 'New Artist', 180);
+
+INSERT INTO Song_lyrics (song_id, lyric_text, moderated)
+VALUES (song_id, 'Line 1 of the lyrics', true),
+       (song_id, 'Line 2 of the lyrics', true),
+       (song_id, 'Line 3 of the lyrics', true);
+
+6--Пользователь. Оценить объяснение слов, добавить к нему комментарий
+UPDATE Song_lyrics set explain_rate = 3 ,explain = 'Плохо передан смысл песни'
+FROM Users
+Where Users.role = 'user';
+
+7--Оставить комментарий
+INSERT INTO Comments (comment_id,user_id, song_id, lyric_id, comment_text)
+VALUES (1, 1,1,1, 'Отличная песня!');
+
+8--Принять песню
+UPDATE Songs 
+SET moderated = true
+FROM Moderators
+WHERE Moderators.role = 'moderator';
+
+9--Принять объяснение 
+UPDATE Song_lyrics 
+SET moderated = true 
+FROM Moderators
+WHERE Moderators.role = 'moderator';
+
+
