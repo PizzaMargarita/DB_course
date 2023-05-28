@@ -1,22 +1,23 @@
 BEGIN;
 
 CREATE TABLE Users(
-	user_id SERIAL PRIMARY KEY,
+	user_id INTEGER PRIMARY KEY,
 	username VARCHAR(255) NOT NULL,
 	password VARCHAR(255) NOT NULL,
 	email VARCHAR(255) NOT NULL,
-  role VARCHAR(200) CHECK (role IN ('user', 'moderator'))
+	role VARCHAR(200) CHECK (role IN ('user'))
 );
-CREATE TABLE Moderator(
-	moder_id SERIAL PRIMARY KEY,
+CREATE TABLE Moderators(
+	moder_id INTEGER PRIMARY KEY,
 	moder_name VARCHAR(255) NOT NULL,
-	moder_password VARCHAR(255) NOT NULL
+	moder_password VARCHAR(255) NOT NULL,
+  	role VARCHAR(200) CHECK (role IN ('moderator'))
 );
 CREATE TABLE Songs(
-	song_id SERIAL PRIMARY KEY,
+	song_id INTEGER PRIMARY KEY,
 	song_name VARCHAR(255) NOT NULL,
 	author VARCHAR(255),
-	duration INTEGER 
+	duration INTEGER,
 	moderated BOOLEAN DEFAULT FALSE
 );
 CREATE TABLE Song_lyrics(
@@ -28,16 +29,19 @@ CREATE TABLE Song_lyrics(
 	moderated BOOLEAN DEFAULT FALSE
 );
 CREATE TABLE Comments(
-	comment_id SERIAL PRIMARY KEY,
+	comment_id INTEGER PRIMARY KEY,
     user_id INTEGER REFERENCES Users(user_id),
     song_id INTEGER REFERENCES Songs(song_id),
     lyric_id INTEGER REFERENCES Song_lyrics(lyric_id),
-    comment_text TEXT NOT NULL
+    comment_text TEXT NOT NULL,
+	lyric_rate TEXT
 );
+COMMIT;
 
-1--Регистрация 
-INSERT INTO Users (username, password, email, role)
-VALUES ('John', 'password123', 'john@example.com', 'user');
+
+1--Регистрация --
+INSERT INTO Users (user_id,username, password, email, role)
+VALUES (1,'John', 'password123', 'john@example.com', 'user');
 
 2--Авторизация 
 SELECT user_id, role
@@ -60,20 +64,29 @@ INSERT INTO Songs (song_name, author, duration)
 VALUES ('New Song', 'New Artist', 180);
 
 INSERT INTO Song_lyrics (song_id, lyric_text, moderated)
-VALUES (song_id, 'Line 1 of the lyrics', false),
-       (song_id, 'Line 2 of the lyrics', false),
-       (song_id, 'Line 3 of the lyrics', false);
+VALUES (song_id, 'Line 1 of the lyrics', true),
+       (song_id, 'Line 2 of the lyrics', true),
+       (song_id, 'Line 3 of the lyrics', true);
 
-6--
+6--Пользователь. Оценить объяснение слов, добавить к нему комментарий
+UPDATE Song_lyrics set explain_rate = 3 ,explain = 'Плохо передан смысл песни'
+FROM Users
+Where Users.role = 'user';
 
 7--Оставить комментарий
-INSERT INTO Comment (comment_id,user_id, song_id, lyric_id, comment_text)
-VALUES (1, 1,1,1, 'Отличная песня!', );
+INSERT INTO Comments (comment_id,user_id, song_id, lyric_id, comment_text)
+VALUES (1, 1,1,1, 'Отличная песня!');
 
 8--Принять песню
-UPDATE Songs set moderated = true
-WHERE role = 'moderator';
+UPDATE Songs 
+SET moderated = true
+FROM Moderators
+WHERE Moderators.role = 'moderator';
 
 9--Принять объяснение 
-Update Song_lyrics set modrated = true
-WHERE role = 'moderator';
+UPDATE Song_lyrics 
+SET moderated = true 
+FROM Moderators
+WHERE Moderators.role = 'moderator';
+
+
